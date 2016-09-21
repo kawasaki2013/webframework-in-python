@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Webフレームワークの構造 &#8212; Webアプリケーションフレームワークの作り方 in Python</title>
+    
+    <link rel="stylesheet" href="_static/solar.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Webアプリケーションフレームワークの作り方 in Python" href="index.html" />
+    <link rel="next" title="ルーティング" href="routing.html" />
+    <link rel="prev" title="WSGI について" href="wsgi.html" /><meta content="Webアプリケーションフレームワークの作り方 in Python" name="title" />
+<meta name="description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta property="og:title" content="Webフレームワークの構造" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="http://c-bata.link/webframework-in-python" />
+<meta property="og:image" content="http://c-bata.link/webframework-in-python/_static/ogp.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta property="og:type" content="website"/>
+
+<meta name="twitter:card"  content="summary_large_image" />
+<meta name="twitter:image" content="http://c-bata.link/webframework-in-python/_static/twitter_share.png" />
+<meta name="twitter:title" content="Webフレームワークの構造" />
+<meta name="twitter:description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta name="twitter:site" content="@c_bata_" />
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+<link href="_static/solarized-dark.css" rel="stylesheet">
+<link rel="icon" href="_static/favicon.ico">
+<style>
+    body {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="routing.html" title="ルーティング"
+             accesskey="N">次へ</a> |</li>
+        <li class="right" >
+          <a href="wsgi.html" title="WSGI について"
+             accesskey="P">前へ</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Webアプリケーションフレームワークの作り方 in Python</a> &#187;</li> 
+      </ul>
+    </div>
+<a href="https://github.com/c-bata/webframework-in-python"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/kobin.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">目次</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Webフレームワークの構造</a><ul>
+<li><a class="reference internal" href="#id1">フレームワークに求められる機能とは？</a><ul>
+<li><a class="reference internal" href="#id2">ルーティング</a></li>
+<li><a class="reference internal" href="#id3">リクエストオブジェクト・レスポンスオブジェクト</a></li>
+<li><a class="reference internal" href="#html">HTMLテンプレート</a></li>
+<li><a class="reference internal" href="#id4">静的ファイルの配信</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#id5">今回作成するWebフレームワーク</a></li>
+<li><a class="reference internal" href="#id6">フレームワークの全体像</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>前のトピックへ</h4>
+  <p class="topless"><a href="wsgi.html"
+                        title="前の章へ">WSGI について</a></p>
+  <h4>次のトピックへ</h4>
+  <p class="topless"><a href="routing.html"
+                        title="次の章へ">ルーティング</a></p>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/structure.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>クイック検索</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="検索" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="web">
+<h1>Webフレームワークの構造<a class="headerlink" href="#web" title="このヘッドラインへのパーマリンク">¶</a></h1>
+<div class="section" id="id1">
+<h2>フレームワークに求められる機能とは？<a class="headerlink" href="#id1" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>Hello Worldを表示するだけの簡単なアプリケーションであれば、フレームワークを使わずに実装することが出来ました。
+それではこれからWebアプリケーションを開発する上で、Webフレームワークがどのような機能を提供すると楽になるでしょうか。</p>
+<div class="section" id="id2">
+<h3>ルーティング<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>先ほどのHello WorldのアプリケーションはどこにアクセスしてもHello Worldが返ってきます。</p>
+</div>
+<div class="section" id="id3">
+<h3>リクエストオブジェクト・レスポンスオブジェクト<a class="headerlink" href="#id3" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>リクエスト情報は、WSGIアプリケーションの第一引数として提供されますが、こちらは辞書型のオブジェクトです。
+ここから直接、GETのクエリパラメータやその他のリクエスト情報を取り出すのは大変なため、
+それらの情報をうまくラップしてくれるクラスがあるといいでしょう。</p>
+<p>またレスポンスのヘッダ情報やステータス情報もうまく管理してくれるクラスがあるとよさそうです。</p>
+</div>
+<div class="section" id="html">
+<h3>HTMLテンプレート<a class="headerlink" href="#html" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>HTMLを表示する際に、Pythonの変数を評価して埋め込めると便利です。
+BottleやDjangoのように、自前でテンプレートエンジンを用意してもいいかもしれませんが、Jinja2などすでに
+広く利用されているテンプレートエンジンのローダがあると便利かもしれません。</p>
+<p>今回は一から実装はせずに、Jinja2のテンプレートエンジンのローダを用意します。</p>
+</div>
+<div class="section" id="id4">
+<h3>静的ファイルの配信<a class="headerlink" href="#id4" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>CSSやJS、画像ファイルなどの静的ファイルは、本番環境の場合、 Nginx 等で返す場合が多いかもしれません。
+しかし開発中や手元のパソコンでも Nginx の設定をして静的ファイルを返すように設定するのは面倒なので、
+フレームワークにも静的ファイルを返す機能があると開発が捗りそうです。</p>
+</div>
+</div>
+<div class="section" id="id5">
+<h2>今回作成するWebフレームワーク<a class="headerlink" href="#id5" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>この資料で作成するフレームワークを使うと次のようにコードを記述出来ます。</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">App</span><span class="p">,</span> <span class="n">Response</span><span class="p">,</span> <span class="n">JSONResponse</span>
+<span class="kn">from</span> <span class="nn">wsgiref.simple_server</span> <span class="kn">import</span> <span class="n">make_server</span>
+
+<span class="n">app</span> <span class="o">=</span> <span class="n">App</span><span class="p">()</span>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;^/$&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">index</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">Response</span><span class="p">(</span><span class="s1">&#39;Hello World&#39;</span><span class="p">)</span>
+
+
+<span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;^/users/(?P&lt;user_id&gt;\d+)/$&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">user_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;user&#39;</span><span class="p">:</span> <span class="n">user_id</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">JSONResponse</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
+
+<span class="k">if</span> <span class="n">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="n">httpd</span> <span class="o">=</span> <span class="n">make_server</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="mi">8000</span><span class="p">,</span> <span class="n">app</span><span class="p">)</span>
+    <span class="n">httpd</span><span class="o">.</span><span class="n">serve_forever</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id6">
+<h2>フレームワークの全体像<a class="headerlink" href="#id6" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>フレームワークの全体像は次のようになっています。</p>
+<div class="figure align-center" id="id7">
+<a class="reference internal image-reference" href="_images/middleware.png"><img alt="フレームワークの全体像" src="_images/middleware.png" style="width: 400px;" /></a>
+<p class="caption"><span class="caption-text">フレームワークの全体像</span></p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="routing.html" title="ルーティング"
+             >次へ</a> |</li>
+        <li class="right" >
+          <a href="wsgi.html" title="WSGI について"
+             >前へ</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Webアプリケーションフレームワークの作り方 in Python</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />WebFramework in Python by Masashi Shibata is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+        <br />Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.6.Theme by <a href="http://github.com/vkvn">vkvn</a>
+    </div>
+  </body>
+</html>

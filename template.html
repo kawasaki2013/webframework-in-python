@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>テンプレートエンジン &#8212; Webアプリケーションフレームワークの作り方 in Python</title>
+    
+    <link rel="stylesheet" href="_static/solar.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Webアプリケーションフレームワークの作り方 in Python" href="index.html" />
+    <link rel="next" title="WSGIミドルウェア" href="middleware.html" />
+    <link rel="prev" title="リクエスト・レスポンス" href="environ.html" /><meta content="Webアプリケーションフレームワークの作り方 in Python" name="title" />
+<meta name="description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta property="og:title" content="テンプレートエンジン" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="http://c-bata.link/webframework-in-python" />
+<meta property="og:image" content="http://c-bata.link/webframework-in-python/_static/ogp.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta property="og:type" content="website"/>
+
+<meta name="twitter:card"  content="summary_large_image" />
+<meta name="twitter:image" content="http://c-bata.link/webframework-in-python/_static/twitter_share.png" />
+<meta name="twitter:title" content="テンプレートエンジン" />
+<meta name="twitter:description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta name="twitter:site" content="@c_bata_" />
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+<link href="_static/solarized-dark.css" rel="stylesheet">
+<link rel="icon" href="_static/favicon.ico">
+<style>
+    body {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="middleware.html" title="WSGIミドルウェア"
+             accesskey="N">次へ</a> |</li>
+        <li class="right" >
+          <a href="environ.html" title="リクエスト・レスポンス"
+             accesskey="P">前へ</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Webアプリケーションフレームワークの作り方 in Python</a> &#187;</li> 
+      </ul>
+    </div>
+<a href="https://github.com/c-bata/webframework-in-python"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/kobin.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">目次</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">テンプレートエンジン</a><ul>
+<li><a class="reference internal" href="#jinja2">Jinja2 おさらい</a></li>
+<li><a class="reference internal" href="#templatereponse">TemplateReponse クラス</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>前のトピックへ</h4>
+  <p class="topless"><a href="environ.html"
+                        title="前の章へ">リクエスト・レスポンス</a></p>
+  <h4>次のトピックへ</h4>
+  <p class="topless"><a href="middleware.html"
+                        title="次の章へ">WSGIミドルウェア</a></p>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/template.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>クイック検索</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="検索" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="id1">
+<h1>テンプレートエンジン<a class="headerlink" href="#id1" title="このヘッドラインへのパーマリンク">¶</a></h1>
+<p>BottleやDjangoのようなフレームワークでは自前でテンプレートエンジンを用意していますが、
+今回は、デファクトスタンダードとなっているJinja2を使用しましょう。</p>
+<div class="section" id="jinja2">
+<h2>Jinja2 おさらい<a class="headerlink" href="#jinja2" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>Jinja2の使い方をおさらいしてみましょう.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">os</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">jinja2</span> <span class="kn">import</span> <span class="n">Environment</span><span class="p">,</span> <span class="n">FileSystemLoader</span>
+<span class="go">&gt;&gt;&gt;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">templates</span> <span class="o">=</span> <span class="p">[</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">),</span> <span class="s1">&#39;templates&#39;</span><span class="p">)]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">env</span> <span class="o">=</span> <span class="n">Environment</span><span class="p">(</span><span class="n">loader</span><span class="o">=</span><span class="n">FileSystemLoader</span><span class="p">(</span><span class="n">templates</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">template</span> <span class="o">=</span> <span class="n">env</span><span class="o">.</span><span class="n">get_tempplate</span><span class="p">(</span><span class="s1">&#39;users.html&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Hello World&#39;</span><span class="p">,</span> <span class="n">users</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;user1&#39;</span><span class="p">,</span> <span class="s1">&#39;users2&#39;</span><span class="p">])</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="templatereponse">
+<h2>TemplateReponse クラス<a class="headerlink" href="#templatereponse" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>それではこれを簡単に扱えるようなResponseクラスを用意します。</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">TemplateResponse</span><span class="p">(</span><span class="n">Response</span><span class="p">):</span>
+    <span class="n">default_content_type</span> <span class="o">=</span> <span class="s1">&#39;text/html; charset=UTF-8&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="s1">&#39;200 OK&#39;</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="s1">&#39;utf-8&#39;</span><span class="p">,</span> <span class="o">**</span><span class="n">tpl_args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">filename</span> <span class="o">=</span> <span class="n">filename</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tpl_args</span> <span class="o">=</span> <span class="n">tpl_args</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init__</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="n">headers</span><span class="p">,</span> <span class="n">charset</span><span class="o">=</span><span class="n">charset</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">render_body</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">jinja2_environment</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">jinja2_environment</span><span class="o">.</span><span class="n">get_template</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">template</span><span class="o">.</span><span class="n">render</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">tpl_args</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">charset</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>render_bodyを呼び出す際に、environmentを渡す必要があるため、つぎのようにAppクラスを書き換えましょう.</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span>from jinja2 import Environment, FileSystemLoader
+
+class App:
+    def __init__(self, templates=None):
+        self.router = Router()
+        if templates is None:
+            templates = [os.path.join(os.path.abspath(&#39;.&#39;), &#39;templates&#39;)]
+        self.jinja2_environment = Environment(loader=FileSystemLoader(templates))
+
+    (中略)
+
+    def __call__(self, env, start_response):
+        method = env[&#39;REQUEST_METHOD&#39;].upper()
+        path = env[&#39;PATH_INFO&#39;] or &#39;/&#39;
+        callback, kwargs = self.router.match(method, path)
+
+        response = callback(Request(env), **kwargs)
+        start_response(response.status, response.header_list)
+        if isinstance(response, TemplateResponse):
+            return [response.render_body(self.jinja2_environment)]
+        return [response.body]
+</pre></div>
+</div>
+<p>これで実装はOKです。使ってみましょう。</p>
+<p><cite>main.py</cite></p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;^/user/$&#39;</span><span class="p">,</span> <span class="s1">&#39;GET&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">users</span><span class="p">(</span><span class="n">request</span><span class="p">):</span>
+    <span class="n">users</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;user</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10</span><span class="p">)]</span>
+    <span class="k">return</span> <span class="n">TemplateResponse</span><span class="p">(</span><span class="s1">&#39;users.html&#39;</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;User List&#39;</span><span class="p">,</span> <span class="n">users</span><span class="o">=</span><span class="n">users</span><span class="p">)</span>
+</pre></div>
+</div>
+<p><cite>templates/users.html</cite></p>
+<div class="highlight-html"><div class="highlight"><pre><span></span><span class="cp">&lt;!DOCTYPE html&gt;</span>
+<span class="p">&lt;</span><span class="nt">html</span> <span class="na">lang</span><span class="o">=</span><span class="s">&quot;ja&quot;</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">head</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">meta</span> <span class="na">charset</span><span class="o">=</span><span class="s">&quot;UTF-8&quot;</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">title</span><span class="p">&gt;</span>{{ title }}<span class="p">&lt;/</span><span class="nt">title</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">head</span><span class="p">&gt;</span>
+<span class="p">&lt;</span><span class="nt">body</span><span class="p">&gt;</span>
+    <span class="p">&lt;</span><span class="nt">ul</span><span class="p">&gt;</span>
+        {% for user in users %}
+        <span class="p">&lt;</span><span class="nt">li</span><span class="p">&gt;</span>{{ user }}<span class="p">&lt;/</span><span class="nt">li</span><span class="p">&gt;</span>
+        {% endfor %}
+    <span class="p">&lt;/</span><span class="nt">ul</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">body</span><span class="p">&gt;</span>
+<span class="p">&lt;/</span><span class="nt">html</span><span class="p">&gt;</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="middleware.html" title="WSGIミドルウェア"
+             >次へ</a> |</li>
+        <li class="right" >
+          <a href="environ.html" title="リクエスト・レスポンス"
+             >前へ</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Webアプリケーションフレームワークの作り方 in Python</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />WebFramework in Python by Masashi Shibata is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+        <br />Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.6.Theme by <a href="http://github.com/vkvn">vkvn</a>
+    </div>
+  </body>
+</html>

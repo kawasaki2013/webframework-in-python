@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>リクエスト・レスポンス &#8212; Webアプリケーションフレームワークの作り方 in Python</title>
+    
+    <link rel="stylesheet" href="_static/solar.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Webアプリケーションフレームワークの作り方 in Python" href="index.html" />
+    <link rel="next" title="テンプレートエンジン" href="template.html" />
+    <link rel="prev" title="ルーティング" href="routing.html" /><meta content="Webアプリケーションフレームワークの作り方 in Python" name="title" />
+<meta name="description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta property="og:title" content="リクエスト・レスポンス" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="http://c-bata.link/webframework-in-python" />
+<meta property="og:image" content="http://c-bata.link/webframework-in-python/_static/ogp.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta property="og:type" content="website"/>
+
+<meta name="twitter:card"  content="summary_large_image" />
+<meta name="twitter:image" content="http://c-bata.link/webframework-in-python/_static/twitter_share.png" />
+<meta name="twitter:title" content="リクエスト・レスポンス" />
+<meta name="twitter:description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta name="twitter:site" content="@c_bata_" />
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+<link href="_static/solarized-dark.css" rel="stylesheet">
+<link rel="icon" href="_static/favicon.ico">
+<style>
+    body {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="template.html" title="テンプレートエンジン"
+             accesskey="N">次へ</a> |</li>
+        <li class="right" >
+          <a href="routing.html" title="ルーティング"
+             accesskey="P">前へ</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Webアプリケーションフレームワークの作り方 in Python</a> &#187;</li> 
+      </ul>
+    </div>
+<a href="https://github.com/c-bata/webframework-in-python"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/kobin.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">目次</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">リクエスト・レスポンス</a><ul>
+<li><a class="reference internal" href="#wsgi-environment">WSGI Environment</a></li>
+<li><a class="reference internal" href="#request">Requestをラップする</a></li>
+<li><a class="reference internal" href="#response">Responseをラップする</a></li>
+<li><a class="reference internal" href="#id2">チューニング</a><ul>
+<li><a class="reference internal" href="#before">Before</a></li>
+<li><a class="reference internal" href="#after">After</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <h4>前のトピックへ</h4>
+  <p class="topless"><a href="routing.html"
+                        title="前の章へ">ルーティング</a></p>
+  <h4>次のトピックへ</h4>
+  <p class="topless"><a href="template.html"
+                        title="次の章へ">テンプレートエンジン</a></p>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/environ.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>クイック検索</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="検索" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="id1">
+<h1>リクエスト・レスポンス<a class="headerlink" href="#id1" title="このヘッドラインへのパーマリンク">¶</a></h1>
+<p>前節にて、ルーティングの実装が完了しました。</p>
+<div class="section" id="wsgi-environment">
+<h2>WSGI Environment<a class="headerlink" href="#wsgi-environment" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>WSGIのアプリケーションの第一引数には、各種リクエストの情報が含まれています。
+しかしこの辞書型のオブジェクトから、様々な情報を取り出すのは少し大変でしょう。
+またviewの関数</p>
+</div>
+<div class="section" id="request">
+<h2>Requestをラップする<a class="headerlink" href="#request" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>厳密にはWSGIのEnvironをラップします。</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Request</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">environ</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">environ</span> <span class="o">=</span> <span class="n">environ</span>
+</pre></div>
+</div>
+<p>各view関数には、envの代わりにbodyを渡しましょう。</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">App</span><span class="p">:</span>
+    <span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
+        <span class="n">callback</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">callback</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">start_response</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>これでRequestがview関数に渡せるようになりました。
+しかしRequestクラスには何も実装していません。
+リクエストボディを読み取りましょう。</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@property</span>
+<span class="k">def</span> <span class="nf">body</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+    <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_body</span> <span class="ow">is</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">content_length</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">environ</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;CONTENT_LENGTH&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;wsgi.input&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">content_length</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_body</span>
+</pre></div>
+</div>
+<p><cite>request.body</cite> と呼び出すだけで、bodyを取り出すことが出来ました。
+curlでjsonを叩いてみましょう。</p>
+</div>
+<div class="section" id="response">
+<h2>Responseをラップする<a class="headerlink" href="#response" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>次に気になるのは、ヘッダ情報の管理が面倒です。
+もう少し簡単に管理できるように、Response情報をラップするクラスを用意してみましょう。</p>
+<p>またView関数の責務も考えます。
+これまでのView関数は <cite>env</cite> や <cite>start_response</cite> , URL変数を受け取って、WSGIのResponseと同じように
+yieldするとbytesのオブジェクトを返すようなオブジェクトを返していました。</p>
+<p>今回からは、requestを受け取ってresponseを返すとしっかり決めてしまいましょう。
+各View関数でResponseのオブジェクトを生成します。</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="nd">@app.route</span><span class="p">(</span><span class="s1">&#39;^/users/(?P&lt;user_id&gt;\d+)/$&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">user_detail</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="n">user_id</span><span class="p">):</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="s1">&#39;Hello user {user_id}&#39;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">user_id</span><span class="o">=</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="n">response</span> <span class="o">=</span> <span class="n">Response</span><span class="p">(</span><span class="n">body</span><span class="o">=</span><span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf-8&#39;</span><span class="p">)],</span>
+                        <span class="n">headers</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;Content-type&#39;</span><span class="p">:</span> <span class="s1">&#39;text/plain; charset=utf-8&#39;</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">response</span>
+</pre></div>
+</div>
+<p>Responseクラスは次のようになります</p>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="k">class</span> <span class="nc">Response</span><span class="p">:</span>
+    <span class="n">default_status</span> <span class="o">=</span> <span class="s1">&#39;200 OK&#39;</span>
+    <span class="n">default_content_type</span> <span class="o">=</span> <span class="s1">&#39;text/html; charset=UTF-8&#39;</span>
+
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">body</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">headers</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">body</span> <span class="o">=</span> <span class="n">body</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">status</span> <span class="o">=</span> <span class="n">status</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_status</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">headers</span> <span class="o">=</span> <span class="n">Headers</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">headers</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">headers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">header_list</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;Content-Type&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">add_header</span><span class="p">(</span><span class="s1">&#39;Content-Type&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">default_content_type</span><span class="p">)</span>
+        <span class="n">out</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+               <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+               <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">headers</span><span class="o">.</span><span class="n">get_all</span><span class="p">(</span><span class="n">key</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="s1">&#39;utf8&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">&#39;latin1&#39;</span><span class="p">))</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">out</span><span class="p">]</span>
+
+<span class="k">class</span> <span class="nc">App</span><span class="p">:</span>
+    <span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__call__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">env</span><span class="p">,</span> <span class="n">start_response</span><span class="p">):</span>
+        <span class="n">callback</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">router</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+        <span class="n">request</span> <span class="o">=</span> <span class="n">Request</span><span class="p">(</span><span class="n">env</span><span class="p">)</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">callback</span><span class="p">(</span><span class="n">request</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">start_response</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">status</span><span class="p">,</span> <span class="n">response</span><span class="o">.</span><span class="n">header_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">response</span><span class="o">.</span><span class="n">body</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="id2">
+<h2>チューニング<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>RequestやResponseのクラスはリクエストがある度に、生成されているためパフォーマンスに大きく影響していそうです。
+ここでは <cite>__slots__</cite> 属性を用いることでメモリを大幅に節約することが出来ます。
+試してみましょう。</p>
+<div class="section" id="before">
+<h3>Before<a class="headerlink" href="#before" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">In</span> <span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="o">%</span><span class="n">load_ext</span> <span class="n">memory_profiler</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">2</span><span class="p">]:</span> <span class="kn">from</span> <span class="nn">app</span> <span class="kn">import</span> <span class="n">Request</span>
+<span class="n">In</span> <span class="p">[</span><span class="mi">3</span><span class="p">]:</span> <span class="o">%</span><span class="n">memit</span> <span class="n">Request</span><span class="p">({})</span>
+<span class="n">peak</span> <span class="n">memory</span><span class="p">:</span> <span class="mf">36.04</span> <span class="n">MiB</span><span class="p">,</span> <span class="n">increment</span><span class="p">:</span> <span class="mf">0.01</span> <span class="n">MiB</span>
+
+<span class="n">In</span> <span class="p">[</span><span class="mi">4</span><span class="p">]:</span> <span class="o">%</span><span class="n">memit</span> <span class="p">[</span><span class="n">Request</span><span class="p">({})</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">10000</span><span class="p">)]</span>
+<span class="n">peak</span> <span class="n">memory</span><span class="p">:</span> <span class="mf">41.63</span> <span class="n">MiB</span><span class="p">,</span> <span class="n">increment</span><span class="p">:</span> <span class="mf">5.52</span> <span class="n">MiB</span>
+</pre></div>
+</div>
+<p>10000個作った時のメモリ使用量は 5.52MiB でした。</p>
+</div>
+<div class="section" id="after">
+<h3>After<a class="headerlink" href="#after" title="このヘッドラインへのパーマリンク">¶</a></h3>
+<p>reloadする前は、 <cite>__slots__</cite> が定義されており、メモリ使用量は18.57MiB
+reloadした後は、 <cite>__slots__</cite> が定義されておらず、メモリ使用量は25.55MiB
+節約できていることが確認できる。</p>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="template.html" title="テンプレートエンジン"
+             >次へ</a> |</li>
+        <li class="right" >
+          <a href="routing.html" title="ルーティング"
+             >前へ</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Webアプリケーションフレームワークの作り方 in Python</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />WebFramework in Python by Masashi Shibata is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+        <br />Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.6.Theme by <a href="http://github.com/vkvn">vkvn</a>
+    </div>
+  </body>
+</html>

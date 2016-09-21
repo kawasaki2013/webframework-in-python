@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+
+
+<html xmlns="http://www.w3.org/1999/xhtml" lang="ja">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>はじめに &#8212; Webアプリケーションフレームワークの作り方 in Python</title>
+    
+    <link rel="stylesheet" href="_static/solar.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '0.0.1',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <script type="text/javascript" src="_static/translations.js"></script>
+    <script type="text/javascript" src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="top" title="Webアプリケーションフレームワークの作り方 in Python" href="index.html" />
+    <link rel="next" title="WSGI について" href="wsgi.html" />
+    <link rel="prev" title="Webアプリケーションフレームワークの作り方 in Python" href="index.html" /><meta content="Webアプリケーションフレームワークの作り方 in Python" name="title" />
+<meta name="description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta property="og:title" content="はじめに" />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="http://c-bata.link/webframework-in-python" />
+<meta property="og:image" content="http://c-bata.link/webframework-in-python/_static/ogp.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta property="og:type" content="website"/>
+
+<meta name="twitter:card"  content="summary_large_image" />
+<meta name="twitter:image" content="http://c-bata.link/webframework-in-python/_static/twitter_share.png" />
+<meta name="twitter:title" content="はじめに" />
+<meta name="twitter:description" content="この資料はPyCon JP 2016で行った「基礎から学ぶWebアプリケーションフレームワークの作り方」の補足資料です。WSGI Webアプリケーションフレームワークの作り方について解説します。" />
+<meta name="twitter:site" content="@c_bata_" />
+<link href='http://fonts.googleapis.com/css?family=Source+Code+Pro|Open+Sans:300italic,400italic,700italic,400,300,700' rel='stylesheet' type='text/css'>
+<link href="_static/solarized-dark.css" rel="stylesheet">
+<link rel="icon" href="_static/favicon.ico">
+<style>
+    body {
+        max-width: 1100px;
+        margin: 0 auto;
+    }
+</style>
+  </head>
+  <body role="document">
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             accesskey="I">索引</a></li>
+        <li class="right" >
+          <a href="wsgi.html" title="WSGI について"
+             accesskey="N">次へ</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Webアプリケーションフレームワークの作り方 in Python"
+             accesskey="P">前へ</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Webアプリケーションフレームワークの作り方 in Python</a> &#187;</li> 
+      </ul>
+    </div>
+<a href="https://github.com/c-bata/webframework-in-python"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://camo.githubusercontent.com/652c5b9acfaddf3a9c326fa6bde407b87f7be0f4/68747470733a2f2f73332e616d617a6f6e6177732e636f6d2f6769746875622f726962626f6e732f666f726b6d655f72696768745f6f72616e67655f6666373630302e706e67" alt="Fork me on GitHub" data-canonical-src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png"></a>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+            <p class="logo"><a href="index.html">
+              <img class="logo" src="_static/kobin.png" alt="Logo"/>
+            </a></p>
+  <h3><a href="index.html">目次</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">はじめに</a><ul>
+<li><a class="reference internal" href="#id2">対象読者</a></li>
+<li><a class="reference internal" href="#id3">本資料に必要なもの</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>前のトピックへ</h4>
+  <p class="topless"><a href="index.html"
+                        title="前の章へ">Webアプリケーションフレームワークの作り方 in Python</a></p>
+  <h4>次のトピックへ</h4>
+  <p class="topless"><a href="wsgi.html"
+                        title="次の章へ">WSGI について</a></p>
+  <div role="note" aria-label="source link">
+    <h3>このページ</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/introduction.txt"
+            rel="nofollow">ソースコードを表示</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>クイック検索</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="検索" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="id1">
+<h1>はじめに<a class="headerlink" href="#id1" title="このヘッドラインへのパーマリンク">¶</a></h1>
+<p>筆者は自分の一番の強みをサーバサイドにしようと考えた時に、DjangoやFlaskなど主要なWebフレームワークの実装を
+知っておきたいと考えるようになりました。
+バグにぶつかった時に、自分では修正できないから誰かが修正してくれるのを待つだけっていうのは、出来るだけやめていきたい。
+自分で問題を修正できる技術をつけたいと考え、BottleやFlaskのソースコードリーディングを始めました。
+色々な実装が分からず、つまづきながらも多くの知識をみにつけることができました。</p>
+<p>フレームワークの勉強に一番いいのは、自分で実装することだと考えています。
+この資料では200行に満たないシンプルなWebフレームワークの作り方について解説します。</p>
+<p>みなさんには、この資料を読んでBottleやKobinのソースコードをまず読んでみて欲しいと考えています。</p>
+<div class="section" id="id2">
+<h2>対象読者<a class="headerlink" href="#id2" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>この資料では実際にPythonでWebアプリケーションのフレームワークを作っていきます。
+そのため、FlaskやBottle、Djangoなどのフレームワークを使ってアプリケーションを開発したことがあると理解がしやすいかと思います。
+またHTTPの知識があると理解がしやすいかもしれません。</p>
+<p>もし読み進めていく中で難しいと感じた場合は、これらの知識をもう少し復習してみるといいかもしれません。
+どうしてもわからない場合はGithubの方にIssueをたてていただけると、そのあたりの補足説明を増やせるかもしれません。
+お気軽に連絡ください。</p>
+</div>
+<div class="section" id="id3">
+<h2>本資料に必要なもの<a class="headerlink" href="#id3" title="このヘッドラインへのパーマリンク">¶</a></h2>
+<p>本資料では下記の環境で解説を進めています。</p>
+<ul class="simple">
+<li>Python 3.5.2</li>
+</ul>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>ナビゲーション</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="総合索引"
+             >索引</a></li>
+        <li class="right" >
+          <a href="wsgi.html" title="WSGI について"
+             >次へ</a> |</li>
+        <li class="right" >
+          <a href="index.html" title="Webアプリケーションフレームワークの作り方 in Python"
+             >前へ</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">Webアプリケーションフレームワークの作り方 in Python</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/"><img alt="Creative Commons License" style="border-width:0" src="https://i.creativecommons.org/l/by-nc-sa/4.0/88x31.png" /></a><br />WebFramework in Python by Masashi Shibata is licensed under a <a rel="license" href="http://creativecommons.org/licenses/by-nc-sa/4.0/">Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License</a>.
+        <br />Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.4.6.Theme by <a href="http://github.com/vkvn">vkvn</a>
+    </div>
+  </body>
+</html>
